@@ -5,9 +5,9 @@ version: "3.0.0"
 require-dbt-version: ">=1.5.0"
 
 dbt-cloud:
-  project-id: 275557 # Put your project id here
+  project-id: 275557
 
-profile: default # Put your profile here
+profile: default  # This should match the profile name in dbt Cloud, typically 'default'
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
@@ -23,16 +23,23 @@ clean-targets:
 
 vars:
   "dbt_date:time_zone": "America/Los_Angeles"
+  load_source_data: true  # <--- Ensure this matches the seed config below
 
+# 🔹 Seeds Configuration
 seeds:
   jaffle_shop:
-    +schema: raw
+    +database: RAW       # ✅ Send seeds to RAW DB
+    +schema: JAFFLE_DEV  # ✅ Match your Snowflake schema
     jaffle-data:
-      +enabled: "{{ var('load_source_data', false) }}"
+      +enabled: "{{ var('load_source_data', true) }}"
 
+# 🔹 Models Configuration
 models:
   jaffle_shop:
+    +database: ANALYTICS     # ✅ All models go to ANALYTICS DB
+    +schema: JAFFLE_DEV      # ✅ Match your Snowflake schema
+
     staging:
-      +materialized: view
+      +materialized: view    # Best for staging
     marts:
-      +materialized: table
+      +materialized: table   # Best for final outputs
